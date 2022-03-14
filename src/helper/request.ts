@@ -1,5 +1,5 @@
 import Taro from "@tarojs/taro";
-
+import { AtMessage } from 'taro-ui'
 const request = ({
   url,
   data = {},
@@ -14,7 +14,7 @@ const request = ({
     ...header
   }
   if (token) {
-    handleHeader.Authorization = "Bearer "+token
+    handleHeader.Authorization = "Bearer " + token
   } else {
     delete handleHeader.Authorization
   }
@@ -22,9 +22,20 @@ const request = ({
     Taro.request({
       url: `${BASE_URL}${url}`, //仅为示例，并非真实的接口地址
       data,
-      method:method,
+      method: method,
       header: handleHeader,
       success: function (res) {
+        var data = res.data;
+        if (data.code === 401) {
+          Taro.removeStorageSync('userInfo')
+          Taro.removeStorageSync('token')
+          Taro.atMessage({'type':'error','message':data.message})
+          Taro.navigateTo({url:'pages/my/pages/my/index'})
+          resolve(res.data);
+          return;
+        }else if(data.code!=200){
+          Taro.atMessage({'type':'error','message':data.message})
+        }
         resolve(res.data);
       },
       fail(e) {

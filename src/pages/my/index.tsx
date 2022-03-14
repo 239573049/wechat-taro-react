@@ -1,7 +1,7 @@
 import React from "react";
 import Taro from '@tarojs/taro'
 import { Button, Text, View } from "@tarojs/components";
-import { AtAvatar } from 'taro-ui'
+import { AtAvatar, AtList, AtListItem } from 'taro-ui'
 import UserInfoDto from '../../models/user/userInfoDto'
 import Login from '../../apis/login/index'
 import './index.less'
@@ -9,7 +9,8 @@ interface IState {
   user: {
     isLogin: boolean,
     userInfo: UserInfoDto
-  }
+  },
+  isOpenEditUser:boolean,
 }
 interface IProps {
 
@@ -20,9 +21,11 @@ class My extends React.Component<IProps, IState>{
     user: {
       isLogin: false,
       userInfo: undefined,
-    }
+    },
+    isOpenEditUser: false
   }
-  componentDidMount(): void {
+
+  componentDidShow () {
     var { user } = this.state
     var userInfo = Taro.getStorageSync('userInfo');
     if (userInfo) {
@@ -52,7 +55,7 @@ class My extends React.Component<IProps, IState>{
                     var { user } = This.state;
                     user.isLogin = true;
                     user.userInfo = userInfo as UserInfoDto;
-                    This.setState({ user })
+                    This.setState({user})
                   }
                 }).catch(err => {
                   console.log(err);
@@ -65,9 +68,20 @@ class My extends React.Component<IProps, IState>{
         })
       }
     })
-
   }
-
+  logout(){
+      var {user}=this.state;
+      user.isLogin=false;
+      user.userInfo=undefined;
+      Taro.removeStorageSync('userInfo')
+      Taro.removeStorageSync('token')
+      this.setState({user})
+  }
+  OpenEditUser(){
+    Taro.navigateTo({
+      url: 'edituser/index'
+    })
+  }
   render(): React.ReactNode {
     var { user } = this.state;
     let status = null;
@@ -80,19 +94,47 @@ class My extends React.Component<IProps, IState>{
       status =
         <view>
           <view className="userInfo">
-
-          <View className='at-row'>
-            <View className='at-col at-col-1 at-col--auto'>
-              <AtAvatar circle image={user.userInfo?.chatHead} ></AtAvatar>
+            <View className='at-row'>
+              <View className='at-col at-col-1 at-col--auto'>
+                <AtAvatar circle image={user.userInfo?.chatHead} ></AtAvatar>
+              </View>
+              <view className="userInfoData">
+                <View className='at-col'>昵称：{user.userInfo?.name}</View>
+                <View className="description">描述：{user.userInfo?.description }</View>
+              </view>
             </View>
-            <View className='at-col'>{user.userInfo?.name}</View>
-          </View>
+          </view>
+          <view className="userSet">
+            <AtList>
+              <AtListItem
+                title='编辑个人信息'
+                arrow='right'
+                thumb='https://xiaohuchat.oss-cn-beijing.aliyuncs.com/icon/edit-information.png'
+                onClick={()=>{
+                  this.OpenEditUser()
+                }}
+              />
+              <AtListItem
+                title='修改密码'
+                note='描述信息'
+                arrow='right'
+                thumb='https://xiaohuchat.oss-cn-beijing.aliyuncs.com/icon/change-password.png'
+              />
+              <AtListItem
+                title='退出登录'
+                note='描述信息'
+                arrow='right'
+                onClick={()=>{this.logout()}}
+                thumb='https://xiaohuchat.oss-cn-beijing.aliyuncs.com/icon/log-out.png'
+              />
+            </AtList>
           </view>
         </view>
     }
     return (
       <view>
         {status}
+        {/* <EditUser {...this.props} isOpenedEditUser={this.state.isOpenEditUser} OpenEditUser={(isOpen)=>{this.OpenEditUser(isOpen)}}/> */}
       </view>
     )
   }

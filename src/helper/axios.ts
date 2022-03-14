@@ -23,7 +23,7 @@ class Axios{
   }
   put(url:string,data:any){
    return new Promise((resolve, reject) => {
-     request({url,method:"PUT"})
+     request({url,method:"PUT",data})
       .then(res=>{
         resolve(res)
       }).catch(err=>{

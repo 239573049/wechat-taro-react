@@ -1,9 +1,10 @@
 export default {
   pages: [
-    'pages/home/index',
-    'pages/group/index',
     'pages/my/index',
     'pages/world/index',
+    'pages/home/index',
+    'pages/group/index',
+    'pages/my/edituser/index',
   ],
   window: {
     backgroundTextStyle: 'light',
