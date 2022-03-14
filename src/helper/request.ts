@@ -6,7 +6,7 @@ const request = ({
   method,
   header = {}
 }) => {
-  const BASE_URL = "http://120.24.50.23:8881/api/"
+  const BASE_URL = "http://localhost:8881/api/"
   var token = Taro.getStorageSync('token')
   const handleHeader = {
     'content-type': 'application/json',
@@ -14,7 +14,7 @@ const request = ({
     ...header
   }
   if (token) {
-    handleHeader.Authorization = token
+    handleHeader.Authorization = "Bearer "+token
   } else {
     delete handleHeader.Authorization
   }

@@ -11,14 +11,15 @@ class Axios{
    })
   }
   post(url:string,data:any){
-   return new Promise((resolve, reject) => {
-     request({url,method:"POST",data})
-      .then(res=>{
-        resolve(res)
-      }).catch(err=>{
-        reject(err)
-      })
-   })
+    return new Promise((resolve, reject) => {
+      request({url,method:"POST",data})
+       .then(res=>{
+         console.log('测试',res);
+         resolve(res)
+       }).catch(err=>{
+         reject(err)
+       })
+    })
   }
   put(url:string,data:any){
    return new Promise((resolve, reject) => {
@@ -41,4 +42,4 @@ class Axios{
    })
   }
 }
-export default new Axios
+export default  Axios
