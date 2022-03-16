@@ -1,4 +1,5 @@
 import Taro from "@tarojs/taro";
+import config from "../config";
 import { AtMessage } from 'taro-ui'
 const request = ({
   url,
@@ -6,7 +7,7 @@ const request = ({
   method,
   header = {}
 }) => {
-  const BASE_URL = "http://localhost:8881/api/"
+  const BASE_URL = config.baseUrl+"api/"
   var token = Taro.getStorageSync('token')
   const handleHeader = {
     'content-type': 'application/json',
