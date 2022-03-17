@@ -16,5 +16,13 @@ class UserInfoApi extends Axios{
   UpdateUserInfo(userInfo:UserInfoDto){
     return this.put("UserInfo/UpdateUserInfo",userInfo)
   }
+  /**
+   * 获取用户信息
+   * @param id
+   * @returns
+   */
+  GetUserById(id:string){
+    return this.get("UserInfo/GetUserById?id="+id)
+  }
 }
 export default new UserInfoApi

@@ -1,4 +1,4 @@
  const config={
-"baseUrl":"http://localhost:8881/"
+"baseUrl":"http://192.168.31.214:8881/"
 }
 export default config

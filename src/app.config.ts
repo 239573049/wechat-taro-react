@@ -5,6 +5,7 @@ export default {
     'pages/home/index',
     'pages/group/index',
     'pages/my/edituser/index',
+    'pages/my/applicationRecord/index',
   ],
   window: {
     backgroundTextStyle: 'light',

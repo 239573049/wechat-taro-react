@@ -1,13 +1,16 @@
 import React from "react";
 import Taro from '@tarojs/taro'
 import { QRCode } from 'taro-code'
-import { Button, Text, View } from "@tarojs/components";
-import { AtAvatar, AtList, AtListItem, AtModal, AtModalAction, AtModalContent, AtModalHeader } from 'taro-ui'
+import { Button, View } from "@tarojs/components";
+import { AtAvatar, AtInput, AtList, AtListItem, AtMessage, AtModal, AtModalAction, AtModalContent, AtModalHeader } from 'taro-ui'
 import UserInfoDto from '../../models/user/userInfoDto'
 import Login from '../../apis/login/index'
 import './index.less'
 import { HubConnection } from '../../helper/signalr'
 import config from '../../config'
+import ApplicationRecordDto from '../../models/groups/applicationRecordDto'
+import UserInfoApi from '../../apis/userInfo/index'
+import ApplicationRecordApi from '../../apis/groups/applicationRecord/index'
 interface IState {
   user: {
     isLogin: boolean,
@@ -16,7 +19,11 @@ interface IState {
   isOpenEditUser: boolean,
   isOpenChat: boolean,
   chat: any,
-  isOpenQr: boolean
+  isOpenQr: boolean,
+  isOpenAdd: boolean,
+  showAddUserInfo: UserInfoDto | undefined,
+  addUserInfo: ApplicationRecordDto | undefined,
+
 }
 interface IProps {
 
@@ -30,7 +37,10 @@ class My extends React.Component<IProps, IState>{
     isOpenEditUser: false,
     isOpenChat: false,
     chat: undefined,
-    isOpenQr: false
+    isOpenQr: false,
+    isOpenAdd: false,
+    addUserInfo: new ApplicationRecordDto,
+    showAddUserInfo: new UserInfoDto
   }
 
   componentDidShow() {
@@ -93,24 +103,52 @@ class My extends React.Component<IProps, IState>{
       url: 'edituser/index'
     })
   }
-  addFirend() {
-    // 允许从相机和相册扫码
-    Taro.scanCode({
-      success: (res) => {
-        console.log(res.result)
-      }
+  ApplicationRecord(){
+    Taro.navigateTo({
+      url: 'applicationRecord/index'
     })
-    // 只允许从相机扫码
+  }
+  addFirend() {
     Taro.scanCode({
-      onlyFromCamera: true,
       success: (res) => {
-        console.log(res.result)
+        this.GetUserById(res.result)
       }
     })
   }
-  
+  GetUserById(id: string) {
+    var { showAddUserInfo, addUserInfo } = this.state;
+    UserInfoApi.GetUserById(id)
+      .then((res: any) => {
+        showAddUserInfo = res.data;
+        addUserInfo.beAppliedId = res.data.id;
+        this.setState({ showAddUserInfo, isOpenAdd: true, addUserInfo })
+      })
+  }
+  onChangaddReamet(value) {
+    var { addUserInfo } = this.state;
+    addUserInfo.remark = value;
+    this.setState({ addUserInfo })
+  }
+  onAddReamet() {
+    var { addUserInfo, isOpenAdd,user} = this.state;
+    console.log(addUserInfo);
+    ApplicationRecordApi.AddFriend(addUserInfo)
+      .then((res: any) => {
+        isOpenAdd = false;
+        if (res.code === 200){
+          this.setState({ isOpenAdd })
+          Taro.atMessage({
+            'message': '发送申请成功',
+            'type': "success",
+          })
+        }else if(res.code===401){
+          user.isLogin=false;
+          this.setState({user,isOpenAdd})
+        }
+      })
+  }
   render(): React.ReactNode {
-    var { user, isOpenQr } = this.state;
+    var { user, isOpenQr, isOpenAdd, addUserInfo, showAddUserInfo } = this.state;
     let status = null;
     if (!user.isLogin) {
       status = <view><Button onClick={() => { this.onLoginClick() }}>
@@ -160,6 +198,7 @@ class My extends React.Component<IProps, IState>{
               <AtListItem
                 title='好友申请记录'
                 arrow='right'
+                onClick={()=>{this.ApplicationRecord()}}
                 thumb='https://xiaohuchat.oss-cn-beijing.aliyuncs.com/icon/applicationrecord.png'
               />
               <AtListItem
@@ -174,7 +213,7 @@ class My extends React.Component<IProps, IState>{
             <AtModalHeader>您的二维码</AtModalHeader>
             <AtModalContent>
               <QRCode
-                text={config.baseUrl + "api/UserInfo/GetUserById?id=" + user.userInfo.id}
+                text={user.userInfo.id}
                 size={200} // 二维码的大小
 
                 style={{ margin: 'auto' }}
@@ -182,12 +221,40 @@ class My extends React.Component<IProps, IState>{
             </AtModalContent>
             <AtModalAction><Button onClick={() => { this.setState({ isOpenQr: false }) }}>确定</Button> </AtModalAction>
           </AtModal>
+          <AtModal isOpened={isOpenAdd}>
+            <AtModalHeader>对方信息</AtModalHeader>
+            <AtModalContent>
+              <View className='at-row'>
+                <View className='at-col at-col-1 at-col--auto'>
+                  <AtAvatar circle image={showAddUserInfo?.chatHead} ></AtAvatar>
+                </View>
+                <view className="userInfoData">
+                  <View className='at-col'>昵称：{showAddUserInfo?.name}</View>
+                  <View className="description">描述：{showAddUserInfo?.description}</View>
+                  <view className="qr" onClick={() => {
+                    this.setState({ isOpenQr: true })
+                  }}>
+                  </view>
+                </view>
+              </View>
+              <AtInput
+                name='remark'
+                adjustPosition={true}
+                title='招呼'
+                type='text'
+                placeholder=''
+                value={addUserInfo.remark}
+                onChange={this.onChangaddReamet.bind(this)}
+              />
+            </AtModalContent>
+            <AtModalAction><Button onClick={() => { this.onAddReamet() }}>确定</Button> </AtModalAction>
+          </AtModal>
         </view>
     }
     return (
       <view>
+        <AtMessage />
         {status}
-        {/* <EditUser {...this.props} isOpenedEditUser={this.state.isOpenEditUser} OpenEditUser={(isOpen)=>{this.OpenEditUser(isOpen)}}/> */}
       </view>
     )
   }
