@@ -1,11 +1,11 @@
 export default {
   pages: [
     'pages/my/index',
+    'pages/my/applicationRecord/index',
     'pages/world/index',
     'pages/home/index',
     'pages/group/index',
     'pages/my/edituser/index',
-    'pages/my/applicationRecord/index',
   ],
   window: {
     backgroundTextStyle: 'light',

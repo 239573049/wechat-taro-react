@@ -6,11 +6,13 @@ import { AtAvatar, AtInput, AtList, AtListItem, AtMessage, AtModal, AtModalActio
 import UserInfoDto from '../../models/user/userInfoDto'
 import Login from '../../apis/login/index'
 import './index.less'
-import { HubConnection } from '../../helper/signalr'
+import Warehouse from '../../warehouse/index'
 import config from '../../config'
 import ApplicationRecordDto from '../../models/groups/applicationRecordDto'
 import UserInfoApi from '../../apis/userInfo/index'
 import ApplicationRecordApi from '../../apis/groups/applicationRecord/index'
+import { HubConnection } from "../../helper/signalr";
+import PushMessage from "../../models/push/pushMessage";
 interface IState {
   user: {
     isLogin: boolean,
@@ -42,7 +44,27 @@ class My extends React.Component<IProps, IState>{
     addUserInfo: new ApplicationRecordDto,
     showAddUserInfo: new UserInfoDto
   }
+  componentDidMount(): void {
+    Login.GetToken()
+      .then((res:any)=>{
+        var { user } = this.state
+        var userInfo = Taro.getStorageSync('userInfo');
+        if(res.code===200){
+          user.isLogin = true;
+          user.userInfo=userInfo;
+          Taro.setStorageSync('token', res.data)
+          Warehouse.getHubConnection().start('chatpush');
+          Warehouse.getHubConnection().on("SystemMessage",(a:PushMessage)=>{
 
+          });
+
+        }else{
+          Taro.removeStorageSync('token')
+          user.isLogin = false;
+        }
+        this.setState({ user })
+      })
+  }
   componentDidShow() {
     var { user } = this.state
     var userInfo = Taro.getStorageSync('userInfo');
@@ -53,7 +75,6 @@ class My extends React.Component<IProps, IState>{
       user.isLogin = false;
     }
     this.setState({ user })
-
   }
   onLoginClick() {
     var This = this;
@@ -74,9 +95,7 @@ class My extends React.Component<IProps, IState>{
                     var { user } = This.state;
                     user.isLogin = true;
                     user.userInfo = userInfo as UserInfoDto;
-                    var chat = new HubConnection().start("chatpush");
-                    This.setState({ user, chat })
-
+                    This.setState({ user})
                   }
                 }).catch(err => {
                   console.log(err);
@@ -96,6 +115,7 @@ class My extends React.Component<IProps, IState>{
     user.userInfo = undefined;
     Taro.removeStorageSync('userInfo')
     Taro.removeStorageSync('token')
+
     this.setState({ user })
   }
   OpenEditUser() {
@@ -253,8 +273,8 @@ class My extends React.Component<IProps, IState>{
     }
     return (
       <view>
-        <AtMessage />
         {status}
+        <AtMessage />
       </view>
     )
   }

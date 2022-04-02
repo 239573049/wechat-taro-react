@@ -1,5 +1,6 @@
 import React from "react";
 import { AtList, AtListItem } from "taro-ui"
+import Warehouse from '../../warehouse'
 interface IState {
   list: any[]
 }

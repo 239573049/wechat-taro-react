@@ -14,7 +14,6 @@ class Axios{
     return new Promise((resolve, reject) => {
       request({url,method:"POST",data})
        .then(res=>{
-         console.log('测试',res);
          resolve(res)
        }).catch(err=>{
          reject(err)

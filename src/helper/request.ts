@@ -31,7 +31,9 @@ const request = ({
           Taro.removeStorageSync('userInfo')
           Taro.removeStorageSync('token')
           Taro.atMessage({'type':'error','message':data.message})
-          Taro.navigateTo({url:'pages/my/pages/my/index'})
+          Taro.navigateTo({
+            url: 'pages/my/index'
+          })
           resolve(res.data);
           return;
         }else if(data.code!=200){
